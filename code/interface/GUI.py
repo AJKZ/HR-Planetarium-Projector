@@ -2,17 +2,45 @@ import tkinter as tk
 from tkcalendar import Calendar
 from tkinter import ttk,messagebox
 import datetime,time
-#import serial
+from ttkwidgets import CheckboxTreeview
+import numpy as n
+import pandas as p
 
+# Helper functions used to convert coordinates
+# Source: https://github.com/numpy/numpy/issues/5228
+def cart2sph(self,x, y, z):
+    hxy = n.hypot(x, y)
+    r = n.hypot(hxy, z)
+    el = n.arctan2(z, hxy)
+    az = n.arctan2(y, x)
+    return az, el, r
 
+def sph2cart(az, el, r):
+    rcos_theta = r * n.cos(el)
+    x = rcos_theta * n.cos(az)
+    y = rcos_theta * n.sin(az)
+    z = r * n.sin(el)
+    return x, y, z
+# End helper function section (a.k.a. only this part is copy/pasted)
 
-#port='COM4'
-#ser=serial.Serial(port,9600)
+# Convert climb/right ascension to degrees
+# Time has to be formatted in "HH MM SS"
+def time2deg(time):
+    time = str(time)
+    RA, rs = '', 1
+    H, M = [float(i) for i in time.split('.')]
+
+    if str(H)[0] == '-':
+        rs, H = -1, abs(H)
+    
+    deg = (H*15) + (M/4)# + (S/240)
+    RA = '{0}'.format(deg*rs)
+
+    return RA
 
 class MainWindow(tk.Frame):
 
     def __init__(self, master): 
-        
         # Variable
         self.master = master
 
@@ -41,63 +69,77 @@ class MainWindow(tk.Frame):
         # Label widget
         speedLabel = tk.Label(self.master,text="Speed")
         speedLabel.place(x=390,y=508)
-        starLabel = tk.Label(self.master,text="Stars")
-        starLabel.place(x=50,y=340)
-        constellationLabel = tk.Label(self.master,text="Constellation")
-        constellationLabel.place(x=170,y=340)
         
-        # create menu
-        menu = Menu(self.master)
-        menu.createStarsMenu()
-        menu.createConstellationMenu()
-        
-        
+        # treeview object
+        tree = Treeview(self.master)
+        tree.createStars()
+        tree.createConstellation()
+        tree.createButton()
 
-class Menu():
+        #################################TESTTTTTTT##################################
+        h = Handler()
+        RA = time2deg(h._getRow(0, 0))
+        print(RA)
+        #################################################
+    
+class Treeview():
     def __init__(self,master):
         self.master=master
+        # create a checkbox treeview
+        self.tree=CheckboxTreeview(self.master)
+        self.tree.place(x=20,y=350);
 
-    def createStarsMenu(self):
         
-        self.starList = [
-        "None",
-        "Star1",
-        "Star2",
-        "Star3",
-        "Star4"
-        ] 
+    def createButton(self): # create a button
+        Button= tk.Button(self.master,text=">", width=5,command= self.checked)
+        Button.place(x=90,y=348)
 
-        self.stars = tk.StringVar(self.master)
-        self.stars.set(self.starList[0])
+    def checked(self):
+            checkedList = self.tree.get_checked()   # get all the checked values from the children checkboxes
+            print(checkedList)
 
-        opt = tk.OptionMenu(self.master, self.stars, *self.starList)
-        opt.config(width=8, font=('Helvetica', 12))
-        opt.place(x=15,y=360)
+            # # if 222 exist in the checkedList
+            # if checkedList.count("221") > 0: 
+            #     print("found")
+            # else:
+            #     print('nope')
+
+    def createStars(self):
+        '''
+        parameters: 
+        - parent: identifier of the parent item
+        - index: where in the list of parent’s children to insert the new item
+        - iid: item identifier
+        - text
+        '''
+        self.tree.insert("","end", "1", text="Star")
+        self.tree.insert("1", "end", "11", text="Star1")
+        self.tree.insert("1", "end", "12", text="Star2")
+        self.tree.insert("1", "end", "13", text="Star3")
         
-        self.stars.trace("w", self.callback) # trace to attach observer on variable
+    def createConstellation(self):
+        self.tree.insert("", "end", "2", text="Constellations")
+        self.tree.insert("2","end","21",text="Const1")
+        self.tree.insert("2","end","22",text="Const2")
+        self.tree.insert("21","end","211",text="Sub Const1")
+        self.tree.insert("22","end","221",text="Sub Const2")
 
-    def createConstellationMenu(self):
-        self.constellationList = [
-        "None",
-        "const1",
-        "const2",
-        "const3",
-        "const4"
-        ] 
-
-        self.constellation = tk.StringVar(self.master)
-        self.constellation.set(self.constellationList[0])
-
-        opt = tk.OptionMenu(self.master, self.constellation, *self.constellationList)
-        opt.config(width=8, font=('Helvetica', 12))
-        opt.place(x=150,y=360)
         
-        self.constellation.trace("w", self.callback) # trace to attach observer on variable
 
-    def callback(self,*args):
-        print(self.stars.get())
-        print(self.constellation.get())
-        
+
+
+
+class Handler:
+    # Initialize with data file
+    def __init__(self):
+        self._data = p.read_csv('data.dat')
+
+    def _getCol(self, col):
+        return self._data.iloc[:, col]
+
+    def _getRow(self, col, row):
+        return self._getCol(col)[row]
+
 
 class windowLayout():
     def __init__(self,master):
@@ -105,14 +147,12 @@ class windowLayout():
         self.master=master
 
     def createWindowLayout(self):    # method to create the layout of the GUI
-        self.windowLayout1= tk.Label(self.master,borderwidth=1,relief='solid',width=50,height=27)
-        self.windowLayout1.place(x=10,y=330)
-        self.windowLayout2= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=38)
-        self.windowLayout2.place(x=380,y=10)
-        self.windowLayout3= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=8)
-        self.windowLayout3.place(x=380,y=600)
-        self.windowLayout4= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=5)
-        self.windowLayout4.place(x=380,y=505)
+        self.windowLayout1= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=38)
+        self.windowLayout1.place(x=380,y=10)
+        self.windowLayout2= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=8)
+        self.windowLayout2.place(x=380,y=600)
+        self.windowLayout3= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=5)
+        self.windowLayout3.place(x=380,y=505)
 
 
 #global namespace
@@ -174,10 +214,10 @@ class CalendarWindow():
     def _addSpeed(self,speed):
         # add the value from the speed to the minuteEntry
         minuteValue=int(minuteEntry.get()) + speed
-        self._updateEntry(minuteValue)
+        self._update(minuteValue)
 
 
-    def _updateEntry(self,minuteValue):
+    def _update(self,minuteValue): # function to update the hour,minute entries en the calendar
         
         if(minuteValue>=60 ):    # if minuteValue is over or equal to 60
             minutes=minuteValue-60            
@@ -194,7 +234,6 @@ class CalendarWindow():
             minutes=minuteValue 
 
         
-
         if(int(hourEntry.get())<0 ):   
 
             # get the day,month and year from the calendar widget
@@ -325,6 +364,7 @@ class Button():
         self.master=master
         self.calendar= CalendarWindow()   
         
+        
         # create Buttons and place it on the window
         playButton= tk.Button(self.master,text=">", width=5,command= self.play)
         playButton.place(x=690,y=530)
@@ -363,8 +403,8 @@ class Button():
         self.calendar._addSpeed(rewindSpeed)
 
     def play(self):
-        pass
- 
+        print("play")
+
     def pause(self):
         print("pause")
 
