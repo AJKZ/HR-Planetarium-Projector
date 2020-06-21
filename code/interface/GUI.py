@@ -1,17 +1,15 @@
-# new: function from fastforward button works.
-
-
 import tkinter as tk
 from tkcalendar import Calendar
 from tkinter import ttk,messagebox
 import datetime,time
-import serial
+#import serial
 
 
-port='COM4'
+
+#port='COM4'
 #ser=serial.Serial(port,9600)
 
-class MainWindow():
+class MainWindow(tk.Frame):
 
     def __init__(self, master): 
         
@@ -29,7 +27,6 @@ class MainWindow():
         openCalendar.calendarSetting()
         openCalendar.timeSetting()
 
-
         # Button objects
         confirmButton= Button(self.master)
         playButton= Button(self.master)
@@ -41,13 +38,66 @@ class MainWindow():
         spinBox.place(x=390,y=527)
         spinBox= Button(self.master,spinBox)
 
-        # Checkbox objects
-        checkBox = Checkbox(self.master)
-        checkBox.createCheckbox()
-
         # Label widget
-        label = tk.Label(self.master,text="Speed")
-        label.place(x=390,y=508)
+        speedLabel = tk.Label(self.master,text="Speed")
+        speedLabel.place(x=390,y=508)
+        starLabel = tk.Label(self.master,text="Stars")
+        starLabel.place(x=50,y=340)
+        constellationLabel = tk.Label(self.master,text="Constellation")
+        constellationLabel.place(x=170,y=340)
+        
+        # create menu
+        menu = Menu(self.master)
+        menu.createStarsMenu()
+        menu.createConstellationMenu()
+        
+        
+
+class Menu():
+    def __init__(self,master):
+        self.master=master
+
+    def createStarsMenu(self):
+        
+        self.starList = [
+        "None",
+        "Star1",
+        "Star2",
+        "Star3",
+        "Star4"
+        ] 
+
+        self.stars = tk.StringVar(self.master)
+        self.stars.set(self.starList[0])
+
+        opt = tk.OptionMenu(self.master, self.stars, *self.starList)
+        opt.config(width=8, font=('Helvetica', 12))
+        opt.place(x=15,y=360)
+        
+        self.stars.trace("w", self.callback) # trace to attach observer on variable
+
+    def createConstellationMenu(self):
+        self.constellationList = [
+        "None",
+        "const1",
+        "const2",
+        "const3",
+        "const4"
+        ] 
+
+        self.constellation = tk.StringVar(self.master)
+        self.constellation.set(self.constellationList[0])
+
+        opt = tk.OptionMenu(self.master, self.constellation, *self.constellationList)
+        opt.config(width=8, font=('Helvetica', 12))
+        opt.place(x=150,y=360)
+        
+        self.constellation.trace("w", self.callback) # trace to attach observer on variable
+
+    def callback(self,*args):
+        print(self.stars.get())
+        print(self.constellation.get())
+        
 
 class windowLayout():
     def __init__(self,master):
@@ -55,7 +105,7 @@ class windowLayout():
         self.master=master
 
     def createWindowLayout(self):    # method to create the layout of the GUI
-        self.windowLayout1= tk.Label(self.master,borderwidth=1,relief='solid',width=50,height=25)
+        self.windowLayout1= tk.Label(self.master,borderwidth=1,relief='solid',width=50,height=27)
         self.windowLayout1.place(x=10,y=330)
         self.windowLayout2= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=38)
         self.windowLayout2.place(x=380,y=10)
@@ -65,14 +115,15 @@ class windowLayout():
         self.windowLayout4.place(x=380,y=505)
 
 
+#global namespace
+minuteEntry=None
+calendar=None
+hourEntry=None
 
 class CalendarWindow():
-    def __init__(self):
-        pass
-
+   
     def calendarSetting(self):
-
-        
+    
         # min and max date
         mindate = datetime.date(year=2000, month=1, day=21)
         maxdate = datetime.date(year=3000, month=12, day=30)
@@ -85,59 +136,85 @@ class CalendarWindow():
         calendar.place(x=0,y=0)
     
     
-
-        
     def getCalendarValue(self):
-         
-        date = calendar.selection_get().strftime("%d-%m-%Y") #change datetime to string
-        print(date)
-        #if(date=="01-01-2020"):
-        #    print("Nice its a string")
 
-    
+        date = calendar.selection_get().strftime("%d-%m-%Y") #change datetime to string
+        return date
+     
 
     def timeSetting(self):
         global minuteEntry
         global hourEntry
 
+        # create the Entries 
         hourEntry = tk.Entry( relief = "ridge", bd = 5, width = 4)
         hourEntry.place(x = 140, y = 250)
         hourEntry.insert(0, 0)
-
         minuteEntry = tk.Entry( relief = "ridge", bd = 5, width = 4)
         minuteEntry.place(x = 180, y = 250)
         minuteEntry.insert(0, 0)
 
-        self.getDateTimeButton=tk.Button(text="confirm",width=10,command=lambda:[self.getTime(),self.getCalendarValue()])# a command that calls 2 methods
+        # button
+        self.getDateTimeButton=tk.Button(text="confirm",width=10,command=self.getDateTime)
         self.getDateTimeButton.place(x=140,y=280) 
 
+    def getDateTime(self):
+        # print the date and time
+        print(self.getCalendarValue())
+        print(self.getTime())
+      
+
     def getTime(self):
-        
         try:
-            self._filterTimeEntry() # check if entry is a valid time
+            return self._filterTimeEntry() # check if entry is a valid time
         except ValueError:
             #Handle the exception
             messagebox.showinfo("Error", "Time is not valid")
     
-    def forward(self,fastForwardSpeed):
-        # add the value from the fastForwardSpeed to the minuteEntry
-        minuteValue=int(minuteEntry.get())+fastForwardSpeed
+    def _addSpeed(self,speed):
+        # add the value from the speed to the minuteEntry
+        minuteValue=int(minuteEntry.get()) + speed
         self._updateEntry(minuteValue)
-        self.getCalendarValue()
-        self.getTime()
 
 
     def _updateEntry(self,minuteValue):
-    
-        if(minuteValue>=60):    # if minuteValue is over the 60
-            minutes=minuteValue-60      
+        
+        if(minuteValue>=60 ):    # if minuteValue is over or equal to 60
+            minutes=minuteValue-60            
             currentHours=int(hourEntry.get())+1 # add 1 to the hour
             hourEntry.delete(0,'end')       # delete the entry
             hourEntry.insert(0,currentHours)    # insert the currentHours into the entry
-        else: 
-            minutes=minuteValue
 
-        if(int(hourEntry.get())>=24):   #if hourEntry is above 24
+        elif(minuteValue<0 ):    # if minuteValue is under 0
+            minutes = 60+minuteValue     
+            currentHours=int(hourEntry.get())-1 # decrement hour by 1
+            hourEntry.delete(0,'end')       # delete the entry
+            hourEntry.insert(0,currentHours)    # insert the currentHours into the entry
+        else: 
+            minutes=minuteValue 
+
+        
+
+        if(int(hourEntry.get())<0 ):   
+
+            # get the day,month and year from the calendar widget
+            day=calendar.selection_get().day
+            month=calendar.selection_get().month
+            year=calendar.selection_get().year
+            
+            # get the previous date
+            date = self.prevDate(year,month,day)
+            
+            # change String to datetime and update the calendar
+            datetime_object = datetime.datetime.strptime(date, '%Y/%m/%d') 
+            calendar.selection_set(datetime_object)
+
+            #reset the hours
+            hourEntry.delete(0,'end')
+            hourEntry.insert(0,23)
+        
+        if(int(hourEntry.get())>=24 ):   #if hourEntry is above 24
+
             # get the day,month and year from the calendar widget
             day=calendar.selection_get().day
             month=calendar.selection_get().month
@@ -145,91 +222,101 @@ class CalendarWindow():
             
             # get the next date
             date = self.nextDate(year,month,day)
-            print(date)
-
+         
             # change String to datetime and update the calendar
             datetime_object = datetime.datetime.strptime(date, '%Y/%m/%d') 
             calendar.selection_set(datetime_object)
 
             #reset the hours
             hourEntry.delete(0,'end')
-            hourEntry.insert(0,0)    
-        
+            hourEntry.insert(0,0)
+
         # update the minuteEntry
         minuteEntry.delete(0,'end') 
         minuteEntry.insert(0,minutes)
 
-        
-    def nextDate(self,year, month, day):# calculate the next date
-            
-        day = day + 1 if day < 30 else 1
+        self.getDateTime()
 
-        if day == 1:
-            if month == 12:
-               month = 1
+    def prevDate(self,year,month,day):
+
+        if(day==1):
+            if(month==1):
+                month=12
+                year-=1
+            else:
+                month-=1
+
+            if(month == 1 or month == 3 or month == 5 or month == 7 or month == 8 or month == 10 or month == 12):
+                day=31
+
+            if(month == 4 or month == 6 or month == 9 or month == 11):
+                day=30
+
+            if(month==2):
+                if(self._isLeap(year)):
+                    day=29
+                else:
+                    day=28
+        else:
+            day-=1
+
+        datetime_str = f'{year}/{str(month).zfill(2)}/{str(day).zfill(2)}'  # str().zfill(2) is to change from 1 digit to 2 digits
+        return datetime_str  
+       
+
+    def nextDate(self,year,month,day): # algorithm to calculate the next date
+        
+        if(month == 1 or month == 3 or month == 5 or month == 7 or month == 8 or month == 10 or month == 12):
+            maxDays=31
+           
+        if(month == 4 or month == 6 or month == 9 or month == 11):
+            maxDays=30
+
+        if(month==2):
+            if(self._isLeap(year)):
+                maxDays=29
+            else:
+                maxDays=28  
+        
+        if(day==maxDays):
+            day = 1
+
+            if(month == 12):
+                month = 1
+                year = year + 1   
+                
             else:
                 month = month + 1
-    
-        year = year + 1 if month == 1 and day == 1 else year
+        else:
+            day = day + 1
+
         datetime_str = f'{year}/{str(month).zfill(2)}/{str(day).zfill(2)}'  # str().zfill(2) is to change from 1 digit to 2 digits
         return datetime_str   
 
+    def _isLeap(self,year):
+        
+        if(year%4==0):
+            return True
+        else:
+            return False
 
     def _filterTimeEntry(self): 
         # check if the hourEntry and minutes are integers
         i = int(hourEntry.get())
         i = int(minuteEntry.get()) 
 
-
         if(int(hourEntry.get()) <= 24 and int(hourEntry.get())>=0 ):    # check if hourEntry is between 0 and 24
             if(int(minuteEntry.get()) <=59 and int(minuteEntry.get())>=0):  # check if minuteEntry is between 0 and 60
                 if( int( hourEntry.get()) == 24 and  int(minuteEntry.get ()) > 0):  # check if time is not above 24 hourEntry
                     messagebox.showinfo("Error", "Time is not valid")
                 else:       # time is valid
-                    print(hourEntry.get().zfill(2)+":"+ minuteEntry.get().zfill(2))  # change 1 digit to 2 digits. 3 -> 03.  
+                    time = f'{str(hourEntry.get()).zfill(2)}:{str(minuteEntry.get()).zfill(2)}' # change 1 digit to 2 digits. 3 -> 03.  
+                    return time
             else:        
                 messagebox.showinfo("Error", "Time is not valid")    
         else:
              messagebox.showinfo("Error", "Time is not valid")    
               
-            
-
-class Checkbox():
-    def __init__(self,master):
-        # Variable
-        self.master=master
-
-    def createCheckbox(self):
-        # checkBox hold a Boolean
-        self.checkValue1 = tk.BooleanVar()
-        self.checkValue2 = tk.BooleanVar()
-        self.checkValue3 = tk.BooleanVar()
-        # initialise the checkboxes
-        self.checkBox1 = tk.Checkbutton(self.master,text = "HighLight 1",var=self.checkValue1,command= self.checkValue)
-        self.checkBox2 = tk.Checkbutton(self.master,text = "HighLight 2",var=self.checkValue2,command= self.checkValue)
-        self.checkBox3 = tk.Checkbutton(self.master,text = "HighLight 3",var=self.checkValue3,command= self.checkValue)
-        # place the checkboxes on the MainWindow
-        self.checkBox1.place(x=13,y=340)
-        self.checkBox2.place(x=13,y=360)
-        self.checkBox3.place(x=13,y=380)
-            
-    def checkValue(self): # check the checkBox value
-        if(self.checkValue1.get()==True):
-        #    ser.write(str.encode('1'))
-            pass
-        else:
-         #   ser.write(str.encode('2'))
-            pass
-            
-        if(self.checkValue2.get()==True):
-         #   ser.write(str.encode('3'))
-            pass
-        else:
-         #   ser.write(str.encode('4'))
-            pass
-        if(self.checkValue3.get()==True):
-           pass
-
 
 class Button():
     def __init__(self, master,controller=None): # we use controller to get the value from the spinBox widget from the MainWindow class
@@ -238,10 +325,7 @@ class Button():
         self.master=master
         self.calendar= CalendarWindow()   
         
-
         # create Buttons and place it on the window
-        confirmButton=tk.Button(self.master, text = 'Confirm', width = 8,command=self.getSpinboxValue)
-        confirmButton.place(x=390,y=550)
         playButton= tk.Button(self.master,text=">", width=5,command= self.play)
         playButton.place(x=690,y=530)
         pauseButton=tk.Button(self.master, text= " ||", width=5,command= self.pause)
@@ -253,21 +337,30 @@ class Button():
 
     def fastforward(self):          
 
-        if(self.controller.get() == "0.1"):
+      
+        if(self.getSpinboxValue() == "0.1"):
             fastForwardSpeed=1
-        if(self.controller.get() == "0.2"):
+        if(self.getSpinboxValue() == "0.2"):
             fastForwardSpeed=2
-        if(self.controller.get() == "0.3"):
+        if(self.getSpinboxValue() == "0.3"):
             fastForwardSpeed=3
-        if(self.controller.get() == "0.4"):
+        if(self.getSpinboxValue() == "0.4"):
             fastForwardSpeed=4  
-                
-        self.calendar.forward(fastForwardSpeed)    # calls the _updateEntry from the calendarWindow class
-
         
+        self.calendar._addSpeed(fastForwardSpeed)   
 
     def rewind(self):
-        print("rewind")
+ 
+        if(self.getSpinboxValue() == "0.1"):
+            rewindSpeed= -1
+        if(self.getSpinboxValue() == "0.2"):
+            rewindSpeed= -2
+        if(self.getSpinboxValue() == "0.3"):
+            rewindSpeed= -3
+        if(self.getSpinboxValue() == "0.4"):
+            rewindSpeed= -4  
+                
+        self.calendar._addSpeed(rewindSpeed)
 
     def play(self):
         pass
@@ -277,13 +370,11 @@ class Button():
 
     def getSpinboxValue(self):
         self.value=self.controller.get() # get the spinBox value
-        print(self.value)
-        #ser.write(str.encode(value))
+        return self.value
         
         
         
-# def GUI(): 
-    # settings for the MainWindow
+
 window = tk.Tk()
 window.geometry("1200x750")
 window.title("GUI")
@@ -292,5 +383,3 @@ application = MainWindow(window)
 application.createObject()
 window.mainloop()
 
-# if __name__ == '__main__':
-#         GUI()
