@@ -1,47 +1,37 @@
 import tkinter as tk
-from tkcalendar import Calendar
+from tkcalendar import Calendar #
 from tkinter import ttk,messagebox
-import datetime,time
-from ttkwidgets import CheckboxTreeview
-import numpy as n
-import pandas as p
-from pyopengltk import OpenGLFrame
-from OpenGL import GL, GLU
+import datetime,time 
+from ttkwidgets import CheckboxTreeview #
+import numpy as n #
+import pandas as p #
+from pyopengltk import OpenGLFrame #
+from OpenGL import GL, GLU #
+import math
+
+
+starList = [" Sirrah"," Alamak"," Mirach"," Hamal"," Caph"," Schedir"," Diphda"," Mira"," Polaris"," Kochab"," Merak"," Dubhe"," Phecda"
+            ," Megrez"," Alioth"," Mizar"," Alkaid", " Pherkad"," Yildun"," Zeta"," Eta"," Epsilon"]
 
 
 
-# Helper functions used to convert coordinates
-# Source: https://github.com/numpy/numpy/issues/5228
-def cart2sph(self,x, y, z):
-    hxy = n.hypot(x, y)
-    r = n.hypot(hxy, z)
-    el = n.arctan2(z, hxy)
-    az = n.arctan2(y, x)
-    return az, el, r
+# https://www.jameswatkins.me/python/astronomy/2019/06/26/cartesian-coordinate-function.html
+# Convert sexigesimal degrees to decimal degrees
+def sexigesimalToDecimalDegrees(degrees, minutes, seconds):
+    decimalDegrees = degrees + (minutes / 60) + (seconds / 3600)
+    return decimalDegrees
+def cartesianCoordinates(RA,declination, distance):
+    x = round((distance * math.cos(declination) * math.cos(RA)), 3)
+    y = round((distance * math.cos(declination) * math.sin(RA)), 3)
+    z = round((distance * math.sin(declination)), 3)
+    return (x, y, z)
 
-def sph2cart(az, el, r):
-    rcos_theta = r * n.cos(el)
-    x = rcos_theta * n.cos(az)
-    y = rcos_theta * n.sin(az)
-    z = r * n.sin(el)
-    return x, y, z
-# End helper function section (a.k.a. only this part is copy/pasted)
-
-# Convert climb/right ascension to degrees
-# Time has to be formatted in "HH MM SS"
-def time2deg(time):
-    time = str(time)
-    RA, rs = '', 1
-    H, M = [float(i) for i in time.split('.')]
-
-    if str(H)[0] == '-':
-        rs, H = -1, abs(H)
+def calculateRA(rhours,rminutes,rseconds):
+    return math.radians(sexigesimalToDecimalDegrees((rhours * 15), (rminutes * 15), (rseconds * 15)))
     
-    deg = (H*15) + (M/4)# + (S/240)
-    RA = '{0}'.format(deg*rs)
 
-    return RA
-
+def calculateDec(ddegrees,dminutes,dseconds):
+    return math.radians(sexigesimalToDecimalDegrees(ddegrees, dminutes, dseconds))
 
 oGLWindow = None
 class MainWindow(tk.Frame):
@@ -62,10 +52,8 @@ class MainWindow(tk.Frame):
         openCalendar._timeSetting()
 
         # Button objects
-        confirmButton= Button(self.master)
-        playButton= Button(self.master)
-        pauseButton= Button(self.master)
-        rewindButton= Button(self.master)
+        button = Button(self.master)
+        button._createButtons()
 
         # spinBox widget
         spinBox= tk.Spinbox(self.master,from_=0.1, to=0.4,state="readonly" ,increment=0.1)    #spinBox value only from 0.1 to 0.4
@@ -121,7 +109,7 @@ class OpenGLWindow(OpenGLFrame):
     minY=-infinit
     maxY= infinit
 
-    zoomedOut=True
+    zoomValue=0
 
     def initgl(self):
         GL.glViewport(0, 0, self.width, self.height)    
@@ -138,12 +126,16 @@ class OpenGLWindow(OpenGLFrame):
         # bind the mouse movements
         self.bind("<Button-1>",self.mousePress)
         self.bind('<ButtonRelease-1>', self.mouseRelease)
-        self.bind('<Double-Button-1>',self.doublePress)
+        self.bind('<Double-Button-1>',self.doublePressLeftMouseButton)
+        self.bind('<Double-Button-3>',self.doublePressRightMouseButton)
         self.start = time.time()
         self.nframes = 0
 
-    def doublePress(self,event): # press 2 times to zoom in and out
-        self.zoom()
+    def doublePressLeftMouseButton(self,event): # press 2 times to zoom in and out
+        self.zoomIn()
+
+    def doublePressRightMouseButton(self,event):
+        self.zoomOut()
 
     def mousePress(self,event):
         self.mousePressX = event.x
@@ -176,44 +168,51 @@ class OpenGLWindow(OpenGLFrame):
         self.yList.append(y)
         self.colorList.append(color)
 
-        # point size varies from magnitude
+        # point size varies from magnitude 
+        # bigger magnitude = smaller pointsize
         if(magnitude >= 0 and magnitude <0.5):
-            pointsize = 3
+            pointsize = 8
         elif(magnitude >= 0.5 and magnitude <1):
-            pointsize = 5
-        elif(magnitude >=1 and magnitude < 1.5):
             pointsize = 7
+        elif(magnitude >=1 and magnitude < 1.5):
+            pointsize = 6
         elif(magnitude >=1.5 and magnitude <2):
-            pointsize =9
-        elif(magnitude >=2):
-            pointsize = 13
+            pointsize =5
+        elif(magnitude >=2 and magnitude < 2.5):
+            pointsize = 4
+        elif(magnitude >=2.5 and magnitude < 3):
+            pointsize = 3
+        elif(magnitude >=3 and magnitude < 3.5):
+            pointsize = 2
+        elif(magnitude >=3.5):
+            pointsize = 1
         self.dotSizeList.append(pointsize) # add it to the list
 
-
-    def zoom(self):
-        if(self.zoomedOut): # if it is already zoomed out
-            self.zoomIn()
-            self.zoomedOut = False
-        else:
-            self.zoomOut()
-            self.zoomedOut = True
-    
     def zoomOut(self):
-        self.minY*= 1.5
-        self.maxY*= 1.5
-        self.minX*= 1.5
-        self.maxX*= 1.5  
-        GL.glLoadIdentity()
-        GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
+        
+        if(self.zoomValue <= -15): # only 3 times zoom out
+            self.zoomValue = -15
+        else:  
+            self.minY*= 1.5
+            self.maxY*= 1.5
+            self.minX*= 1.5
+            self.maxX*= 1.5  
+            GL.glLoadIdentity()
+            GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
+            self.zoomValue-=5
         
     def zoomIn(self):
-        self.minY/= 1.5
-        self.maxY/= 1.5
-        self.minX/= 1.5
-        self.maxX/= 1.5  
-        GL.glLoadIdentity()
-        GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
-        
+        if(self.zoomValue >=15): # only 3 times zoom in
+            self.zoomValue = 15
+        else:
+            self.minY/= 1.5
+            self.maxY/= 1.5
+            self.minX/= 1.5
+            self.maxX/= 1.5  
+            GL.glLoadIdentity()
+            GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
+            self.zoomValue+=5
+      
     def moveUp(self):
         self.maxY+= self.infinit/4
         self.minY+= self.infinit/4
@@ -242,11 +241,14 @@ class OpenGLWindow(OpenGLFrame):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         for i in range(len(self.xList)): # get the length of the list
             size = self.dotSizeList[i]
-            if(self.zoomedOut):
+            if(self.zoomValue > 0):
+                size = size + self.zoomValue
                 GL.glPointSize(size) #change the point size
             else:
-                size*=1.5 # increase the point size
-                GL.glPointSize(size) 
+                size = size + self.zoomValue
+                if(size <= 1):
+                    size = 1
+                GL.glPointSize(size)
             GL.glBegin(GL.GL_POINTS)
             GL.glColor4f(self.colorList[i][0],self.colorList[i][1],self.colorList[i][2],self.colorList[i][3]) # get the colors
             GL.glVertex2f(self.xList[i] ,self.yList[i]  )   #get the x and y coordinates
@@ -257,10 +259,12 @@ class OpenGLWindow(OpenGLFrame):
         tm = time.time() - self.start
         
 
+
 class Treeview():
     def __init__(self,master):
         self.master=master
         self.mw=MainWindow(self.master)
+        self.openGLWindow = self.mw.getOpenGLWindow()
         
         # create textBox to insert the data from the stars
         self.textBox = TextBox(self.master)
@@ -269,16 +273,22 @@ class Treeview():
     def setValuesToTextBox(self,name,XYZ):
         # insert the value in the text box
         self.textBox.tb.insert(tk.END, f"Name : {name}\n")
-        self.textBox.tb.insert(tk.END, f"X coordinate : {XYZ[0]}\n")
-        self.textBox.tb.insert(tk.END, f"y coordinate : {XYZ[1]}\n")
-        self.textBox.tb.insert(tk.END, f"z coordinate : {XYZ[2]}\n")
+        self.textBox.tb.insert(tk.END, f"X : {XYZ[0]}\n")
+        self.textBox.tb.insert(tk.END, f"y : {XYZ[1]}\n")
+        self.textBox.tb.insert(tk.END, f"z : {XYZ[2]}\n")
 
     def setStarData(self,row):
         h = Handler() 
         self.name = h._getRow(5,row)
-        self.RA = float(time2deg(h._getRow(0, row)))  
-        self.dec = (h._getRow(1, row))
-        self.XYZ = sph2cart(self.RA, self.dec, 10000000000)  
+        RAHour = h._getRow(6, row)
+        RAMinutes = h._getRow(7, row)
+        RASec = h._getRow(8, row)
+        decDegree = h._getRow(1, row)
+        decMin = h._getRow(9, row)
+        decSec = h._getRow(10, row)
+        self.RA = calculateRA(RAHour,RAMinutes,RASec)
+        self.dec = calculateDec(decDegree,decMin,decSec)
+        self.XYZ = cartesianCoordinates(self.RA,self.dec,10000000000)
         self.magnitude = h._getRow(2, row)
 
     def getXYZ(self):
@@ -290,116 +300,51 @@ class Treeview():
     def getMagnitude(self):
         return self.magnitude
 
+    def _findNameOfStar(self,name):
+
+        checkedList = self.tree.get_checked()   # get all the checked values from the children checkboxes
+        whiteColor = [1,1,1,1]
+        grayColor = [1,1,1,0.2]
+
+        h = Handler()
+        colomLength = len(h._getCol(0)) 
+        for i in range(colomLength):
+ 
+            if(h._getRow(5,i) == name):  # loops through all the data from the 5 column and find the name
+                if(checkedList.count(name) > 0): # name of the star is checked in the checkbox, highlight the star.
+                    self.setStarData(i) # give the row number to read the data from the data set
+                    self.openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) # add the xyz and color data to the lists
+                    self.setValuesToTextBox(self.getName(),self.getXYZ()) #add the values to the textBox
+                else:  # name of the star is not checked in the checkbox change the color to gray 
+                    self.setStarData(i)
+                    self.openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude()) 
+
     def getChecked(self):
-            checkedList = self.tree.get_checked()   # get all the checked values from the children checkboxes
-            openGLWindow = self.mw.getOpenGLWindow() # get the openGLWindow object
-
+    
             # clear the list
-            openGLWindow.xList.clear() 
-            openGLWindow.yList.clear() 
-            openGLWindow.colorList.clear()
-            openGLWindow.dotSizeList.clear()
-
+            self.openGLWindow.xList.clear() 
+            self.openGLWindow.yList.clear() 
+            self.openGLWindow.colorList.clear()
+            self.openGLWindow.dotSizeList.clear()
+ 
             #clear the text box
             self.textBox.tb.delete('1.0', tk.END)
-
-            whiteColor = [1,1,1,1]
-            grayColor = [1,1,1,0.2]
             
-            if checkedList.count("Sirrah") > 0: 
-                self.setStarData(0) # give the row number to read the data from the data set
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) # add the xyz and color data to the lists
-                self.setValuesToTextBox(self.getName(),self.getXYZ()) #add the values to the textBox
-              
-            else: 
-                self.setStarData(0)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude()) 
-              
-            if checkedList.count("Mirach") > 0: 
-                self.setStarData(6)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(6)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-            
-            if checkedList.count("Alamak") > 0: 
-                self.setStarData(11)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-           
-            else: 
-                self.setStarData(11)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-            
-
-            if checkedList.count("Hamal") > 0: 
-                self.setStarData(12)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(12)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-            
-
-            if checkedList.count("Colure_star") > 0: 
-                self.setStarData(1)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(1)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-          
-
-            if checkedList.count("Schedir") > 0: 
-                self.setStarData(3)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(3)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-         
-
-            if(checkedList.count("Deneb_Kaitos") > 0):
-                self.setStarData(4)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(4)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-           
-            if(checkedList.count("Mira") > 0):
-                self.setStarData(13)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(13)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-           
-            
-            if(checkedList.count("Polaris") > 0):
-                self.setStarData(7)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(7)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-            
-
-            if(checkedList.count("Kochab") > 0):
-                self.setStarData(65)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
-                self.setValuesToTextBox(self.getName(),self.getXYZ())
-            else: 
-                self.setStarData(65)
-                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
-              
+            for i in range(len(starList)): # loop through all the stars in the list
+                self._findNameOfStar(starList[i]) # find the name
+                
+ 
 
     def _createTreeview(self):
         # create a checkbox treeview
         self.tree=CheckboxTreeview(self.master)
-        self.tree.place(x=40,y=320,height=400);
-        self.tree.bind("<ButtonRelease-1>", self.callBack) # bind an event to the checkbox.
+        self.tree.place(x=0,y=320,height=400)
+        scrollbar = tk.Scrollbar(self.master) # create a scrollbar
+        scrollbar.place(x=200,y=330,relheight=0.5)
+        scrollbar.config(command=self.tree.yview)    
+        self.tree.config(yscrollcommand=scrollbar.set) # attach the scrollbar to the textbox
+
+        self.tree.bind("<ButtonRelease-1>", self.callBack) # bind an mouse event to the checkbox.
         '''
         parameters: 
         - parent: identifier of the parent item
@@ -408,22 +353,34 @@ class Treeview():
         - text
         '''
         self.tree.insert("", "end", "And", text="Andromeda")
-        self.tree.insert("And","end","Sirrah",text="Sirrah")
-        self.tree.insert("And","end","Mirach",text="Mirach")
-        self.tree.insert("And","end","Alamak",text="Alamak")
+        self.tree.insert("And","end"," Sirrah",text="Sirrah")
+        self.tree.insert("And","end"," Mirach",text="Mirach")
+        self.tree.insert("And","end"," Alamak",text="Alamak")
         self.tree.insert("","end","Ari",text="Aries")
-        self.tree.insert("Ari","end","Hamal",text="Hamal")
+        self.tree.insert("Ari","end"," Hamal",text="Hamal")
         self.tree.insert("","end","Cas",text="Cassiopeia")
-        self.tree.insert("Cas","end","Colure_star",text="Colure_star")
-        self.tree.insert("Cas","end","Schedir",text="Schedir")
+        self.tree.insert("Cas","end"," Caph",text="Caph")
+        self.tree.insert("Cas","end"," Schedir",text="Schedir")
         self.tree.insert("","end","Cet",text="Cetus")
-        self.tree.insert("Cet","end","Deneb_Kaitos",text="Deneb_Kaitos")
-        self.tree.insert("Cet","end","Mira",text="Mira")
+        self.tree.insert("Cet","end"," Diphda",text="Diphda")
+        self.tree.insert("Cet","end"," Mira",text="Mira")
         self.tree.insert("","end","UMi",text="Ursae Minoris")
-        self.tree.insert("UMi","end","Polaris",text="Polaris")
-        self.tree.insert("UMi","end","Kochab",text="Kochab")
+        self.tree.insert("UMi","end"," Polaris",text="Polaris")
+        self.tree.insert("UMi","end"," Kochab",text="Kochab")
+        self.tree.insert("UMi","end"," Pherkad",text="Pherkad")
+        self.tree.insert("UMi","end"," Yildun",text="Yildun")
+        self.tree.insert("UMi","end"," Zeta",text="Zeta")
+        self.tree.insert("UMi","end"," Eta",text="Eta")
+        self.tree.insert("UMi","end"," Epsilon",text="Epsilon")
+        self.tree.insert("","end","UMa",text="Ursae Majoris")
+        self.tree.insert("UMa","end"," Merak",text ="Merak")
+        self.tree.insert("UMa","end"," Dubhe",text ="Dubhe")
+        self.tree.insert("UMa","end"," Phecda",text ="Phecda")
+        self.tree.insert("UMa","end"," Megrez",text ="Megrez")
+        self.tree.insert("UMa","end"," Alioth",text ="Alioth")
+        self.tree.insert("UMa","end"," Mizar",text ="Mizar")
+        self.tree.insert("UMa","end"," Alkaid",text ="Alkaid")
         
-
 
     def callBack(self, event):
         item = self.tree.identify('item',event.x,event.y)
@@ -431,8 +388,6 @@ class Treeview():
         
 
   
-
-
 class Handler:
     # Initialize with data file
     def __init__(self):
@@ -651,6 +606,7 @@ class Button():
         self.calendar= CalendarWindow()     
         self.mw=MainWindow(self.master)
 
+    def _createButtons(self):
         # create Buttons and place it on the window
         moveToTopButton= tk.Button(self.master,text="↑",width=5,relief = "groove",command= self._moveToTop)
         moveToTopButton.place(x=1000,y=545)
@@ -660,8 +616,10 @@ class Button():
         moveToLeftButton.place(x=950,y=560)
         moveToRightButton=tk.Button(self.master, text= "→", width=5,relief = "groove",command= self._moveToRight)
         moveToRightButton.place(x=1050,y=560)
-        zoomButton = tk.Button(self.master,text="🔍",width=5,relief = "groove",command = self._zoom)
-        zoomButton.place( x= 880, y = 560)
+        zoomInButton = tk.Button(self.master,text="➕",width=5,relief = "groove",command = self._zoomIn)
+        zoomInButton.place( x= 880, y = 560)
+        zoomOutButton = tk.Button(self.master,text="➖",width=5,relief = "groove",command = self._zoomOut)
+        zoomOutButton.place( x= 830, y = 560)
         rewindButton=tk.Button(self.master, text= "<<", width= 5,relief = "groove", command = self._rewind)
         rewindButton.place(x=590,y=560)
         fastforwardButton=tk.Button(self.master,text=">>",width=5,relief = "groove",command=self._fastforward)
@@ -669,7 +627,6 @@ class Button():
         getDateTimeButton=tk.Button(self.master,text="confirm",relief = "groove",width=10,command=self.calendar.getDateTime)
         getDateTimeButton.place(x=140,y=280)   
 
- 
     def _fastforward(self):          
         if(self.getSpinboxValue() == "0.1"):
             fastForwardSpeed=1
@@ -679,6 +636,7 @@ class Button():
             fastForwardSpeed=3
         if(self.getSpinboxValue() == "0.4"):
             fastForwardSpeed=4  
+        
 
         try:
             self.calendar._filterTimeEntry() #check if the current time is valid
@@ -707,9 +665,13 @@ class Button():
         else:   #time is valid
             self.calendar._addSpeed(rewindSpeed)
 
-    def _zoom(self):
+    def _zoomIn(self):
         openGLWindow = self.mw.getOpenGLWindow() # get the openGLFrame object
-        openGLWindow.zoom()
+        openGLWindow.zoomIn()
+
+    def _zoomOut(self):
+        openGLWindow = self.mw.getOpenGLWindow() # get the openGLFrame object
+        openGLWindow.zoomOut()
 
     def _moveToTop(self):
         openGlWindow = self.mw.getOpenGLWindow() 
@@ -742,11 +704,3 @@ window.iconphoto(False, icon) # change the icon from the gui
 application = MainWindow(window)
 application.createObject()
 window.mainloop()
-
-
-
-
-
-
-
-
