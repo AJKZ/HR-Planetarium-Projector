@@ -1,0 +1,179 @@
+magnitude, cname, brightness, sname, rh, rm, rs, dd, dm , ds
+2.2, Andromeda, alp, Alpheratz, 0, 0, 34, 29, 5, 26
+2.4, Andromeda, bet, Mirach, 1, 9, 43, 35, 37, 15
+2.1, Andromeda, gam, Almach, 2, 3, 54, 42, 19, 47
+3.27, Andromeda, del, Delta Andromedae, 0, 39, 19, 30, 51, 38
+2.2, Cassiopeia, alp, Schedar, 0, 40, 30, 56, 32, 14
+2.4, Cassiopeia, bet, Caph, 0, 9, 10, 59, 9, 0
+2.47, Cassiopeia, gam, Gamma Cassiopeiae, 0, 56, 42, 60, 43, 0
+2.68, Cassiopeia, del, Ruchbah, 1, 25, 49, 60, 14, 7
+3.38, Cassiopeia, eps, Segin, 1, 54, 23, 63, 40, 12
+2.2, Aries, alp, Hamal, 2, 7, 10, 23, 27, 44
+2.64, Aries, bet, Sheratan, 1, 54, 38, 20, 48, 29
+4.35, Aries, gam, Botein, 3, 11, 37, 19, 43, 36
+3.63, Aries, 41, Bharani, 2, 49, 59, 27, 15, 38
+2.0, Ursa Major, alp, Dubhe, 11, 3, 43, 61, 45, 2
+2.4, Ursa Major, bet, Merak, 11, 1, 50, 56, 22, 57
+2.4, Ursa Major, gam, Phecda, 11, 53, 49, 53, 41, 40
+3.3, Ursa Major, del, Megrez, 12, 15, 25, 57, 1, 56
+1.7, Ursa Major, eps, Alioth, 12, 54, 1, 55, 57, 34
+2.2, Ursa Major, zet, Mizar, 13, 23, 55, 54, 55, 31
+1.9, Ursa Major, eta, Alkaid, 13, 47, 32, 49, 18, 47
+2.3, Ursa Minor, alp, Polaris, 2, 31, 48, 89, 15, 51
+2.2, Ursa Minor, bet, Kochab, 14, 50, 42, 74, 9, 20
+3.0, Ursa Minor, gam, Pherkad, 15, 20, 43, 71, 50, 2
+4.36, Ursa Minor, del, Yildun, 17, 32, 12, 86, 35, 11
+4.23, Ursa Minor, eps, Epsilon Ursa Minoris, 16, 45, 58, 82, 2, 13
+4.32, Ursa Minor, zet, Seta Ursa Minoris, 15, 44, 3, 77, 47, 39
+4.95, Ursa Minor, eta, Eta Ursa Minoris, 16, 17, 30, 75, 45, 19
+3.65, Draco, alp, Thuban, 14, 4, 23, 64, 22, 32
+2.79, Draco, bet, Rastaban, 17, 30, 25, 52, 18, 5
+2.23, Draco, gam, Eltanin, 17, 56, 36, 51, 29, 20
+3.07, Draco, del, Altais, 19, 12, 33, 67, 39, 42
+3.83, Draco, eps, Epsilon Draconis, 19, 48, 10, 70, 16, 4
+3.17, Draco, zet, Aldhibah, 17, 8, 47, 65, 42, 52
+2.74, Draco, eta, Athebyne, 16, 23, 59, 61, 30, 51
+4.01, Draco, the, Theta Draconis, 16, 1, 53, 58, 33, 55
+3.29, Draco, iot, Edasich, 15, 24, 55, 58, 57, 57
+3.87, Draco, kap, Kappa Draconis, 12, 33, 29, 69, 47, 17
+3.84, Draco, lam, Giausar, 11, 31, 24, 69, 19, 51
+3.75, Draco, xi, Grumium, 17, 53, 31, 56, 52, 22
+3.57, Draco, chi, Draco Chi, 18, 21, 3, 72, 43, 58
+2.44, Cepheus, alp, Alderamin, 21, 18, 34, 62, 35, 8
+3.23, Cepheus, bet, Alfirk, 21, 28, 39, 70, 33, 38
+3.21, Cepheus, gam, Errai, 23, 39, 20, 77, 37, 56
+3.75, Cepheus, del, Delta Cephei, 22, 29, 10, 58, 24, 55
+3.52, Cepheus, iot, Iota Cephei, 22, 49, 40, 66, 12, 2
+4.29, Camelopardalis, alp, Alpha Camelopardalis, 4, 54, 2, 66, 20, 34
+4.03, Camelopardalis, bet, Beta Camelopardalis, 5, 3, 25, 60, 26, 31
+4.63, Camelopardalis, gam, Gamma Camelopardalis, 3, 50, 21, 71, 19, 55
+4.8, Camelopardalis, HR, HR2209, 6, 18, 50, 69, 19, 10
+4.55, Camelopardalis, HR, HR2527, 7, 0, 3, 76, 58, 39
+4.47, Camelopardalis, 7, 7 Camelopardalis, 4, 57, 17, 53, 45, 7
+2.9, Canes Venatici, alp, Cor Caroli, 12, 56, 1, 38, 19, 5
+4.26, Canes Venatici, bet, Chara, 12, 33, 44, 41, 21, 27
+3.13, Lynx, alp, Alpha Lyncis, 9, 21, 3, 34, 23, 32
+4.48, Lynx, 2,  2 Lyncis, 6, 19, 37, 59, 0, 38
+4.35, Lynx, 15, 15 Lyncis, 6, 57, 16, 58, 25, 20
+4.64, Lynx, 21, 21 Lyncis, 7, 26, 42, 49, 12, 41
+4.25, Lynx, 31, Alsciaukat, 8, 23, 50, 43, 11, 17
+3.82, Lynx, 38, 38 Lyncis, 9, 18, 50, 36, 48, 9
+4.56, Lynx, HR, HR3612, 9, 6, 31, 38, 27, 7
+4.21, Leo Minor, bet, Beta Leo Minoris, 10, 27, 52, 36, 42, 25
+3.83, Leo Minor, 46, Praecipua, 10, 53, 18, 34, 12, 54
+4.48, Leo Minor, 21, 21 Leo Minoris, 10, 7, 25, 35, 14, 40
+0.08, Auriga, alp, Capella, 5, 16, 41, 45, 59, 53
+1.9, Auriga, bet, Menkalinan, 5, 59, 31, 44, 56, 50
+2.62, Auriga, the, Mahasim, 5, 59, 43, 37, 12, 44
+2.69, Auriga, iot, Hassaleh, 4, 56, 59, 33, 9, 57
+1.79, Perseus, alp, Mirfak, 3, 24, 19, 49, 51, 39
+2.12, Perseus, bet, Algol, 3, 8, 10, 40, 57, 20
+2.93, Perseus, gam, Gamma Persei, 3, 4, 47, 53, 30, 23
+2.89, Perseus, eps, Epsilon Persei, 3, 57, 51, 40, 0, 37
+3.76, Perseus, eta, Miram, 2, 50, 41, 55, 53, 44
+2.85, Perseus, zet, Zeta Persei, 3, 54, 7, 31, 53, 0
+3.8, Perseus, kap, Misam, 3, 9, 29, 44, 51, 25
+3.77, Perseus, nu, Nu Persei, 3, 45, 11, 42, 34, 42
+3.83, Perseus, omi, Atik, 3, 44, 19, 32, 17, 17
+3.39, Perseus, rho, Rho Persei, 3, 5, 10, 38, 50, 25
+4.23, Perseus, 16, 16 Persei, 2, 50, 35, 38, 19, 6
+0.85, Taurus, alp, Aldebaran, 4, 35, 55, 16, 30, 33
+1.65, Taurus, bet, Elnath, 5, 26, 17, 28, 36, 27
+3.65, Taurus, gam, Prima Hyadum, 4, 19, 47, 15, 37, 38
+3.76, Taurus, del, Secunda Hyadum, 4, 22, 56, 17, 32, 33
+3.53, Taurus, eps, Ain, 4, 28, 36, 19, 10, 49
+3.0, Taurus, zet, Tianguan, 5, 37, 38, 21, 8, 32
+2.87, Taurus, eta, Alcyone, 3, 47, 29, 24, 6, 18
+3.84, Taurus, the1, Theta Tauri 1, 4, 28, 34, 15, 57, 43
+3.4, Taurus, the2, Chamukuy, 4, 28, 39, 15, 52, 14
+3.47, Taurus, lam, Lambda Tauri, 4, 0, 40, 12, 29, 25
+3.6, Taurus, omi, Omicron Tauri, 3, 24, 48, 9, 1, 44
+3.74, Taurus, xi, Xi Tauri, 3, 27, 10, 9, 43, 58
+1.98, Gemini, alp, Castor, 7, 34, 36, 31, 53, 17
+1.14, Gemini, bet, Pollux, 7, 45, 18, 28, 1, 33
+1.93, Gemini, gam, Alhena, 6, 37, 42, 16, 23, 57
+3.53, Gemini, del, Wasat, 7, 20, 7, 21, 58, 55
+2.98, Gemini, eps, Mebsuta, 6, 43, 55, 25, 7, 51
+3.79, Gemini, zet, Mekbuda, 7, 4, 6, 20, 34, 13
+3.28, Gemini, eta, Propus, 6, 14, 52, 22, 30, 24
+3.6, Gemini, the, Theta Geminorum, 6, 52, 47, 33, 57, 39
+3.79, Gemini, iot, Iota Geminorum, 7, 25, 43, 27, 47, 53
+3.57, Gemini, kap, Kappa Geminorum, 7, 44, 26, 24, 23, 53
+3.58, Gemini, lam, Lambda Geminorum, 7, 18, 5, 16, 32, 25
+2.88, Gemini, mu, Tejat, 6, 22, 57, 22, 30, 48
+4.15, Gemini, nu, Nu Geminorum, 6, 28, 57, 20, 12, 43
+4.41, Gemini, tau, Tau Geminorum, 7, 11, 8, 30, 14, 43
+4.06, Gemini, ups, Upsilon Geminorum, 7, 35, 55, 26, 53, 44
+3.36, Gemini, xi, Alzirr, 6, 45, 17, 12, 53, 44
+4.25, Cancer, alp, Acubens, 8, 58, 29, 11, 51, 28
+3.52, Cancer, bet, Tarf, 8, 16, 30, 9, 11, 8
+4.66, Cancer, gam, Asellus Borealis, 8, 43, 17, 21, 28, 6
+3.94, Cancer, del, Asellus Australis, 8, 44, 41, 18, 9, 15
+4.02, Cancer, iot, Iota Cancri, 8, 46, 41, 28, 45, 36
+1.35, Leo, alp, Regulus, 10, 8, 22, 11, 58, 1
+2.14, Leo, bet, Denebola, 11, 49, 3, 14, 34, 18
+2.61, Leo, gam, Algieba, 10, 19, 58, 19, 50, 30
+2.56, Leo, del, Zosma, 11, 14, 6, 20, 31, 24
+2.98, Leo, eps, Epsilon Leonis, 9, 45, 51, 23, 46, 27
+3.44, Leo, zet, Adhafera, 10, 16, 41, 23, 25, 1
+3.52, Leo, eta, Eta Leonis, 10, 7, 19, 16, 45, 46
+3.34, Leo, the, Chertan, 11, 14, 14, 15, 25, 45
+3.88, Leo, mu, Rasalas, 9, 52, 45, 26, 0, 24
+-0.04, Boötes, alp, Arcturus, 14, 15, 39, 19, 10, 57
+3.5, Boötes, bet, Nekkar, 15, 1, 56, 40, 23, 26
+3.03, Boötes, gam, Seginus, 14, 32, 4, 38, 18, 29
+3.47, Boötes, del, Delta Boötis, 15, 15, 30, 33, 18, 52
+2.7, Boötes, eps, Izar, 14, 44, 59, 27, 4, 27
+4.43, Boötes, zet, Zeta Boötis, 14, 41, 8, 13, 43, 41
+2.68, Boötes, eta, Muphrid, 13, 53, 41, 18, 23, 52
+3.58, Boötes, rho, Rho Boötis, 14, 31, 49, 30, 22, 17
+4.07, Boötes, ups, Upsilon Boötis, 13, 49, 28, 15, 47, 52
+2.23, Corona Borealis, alp, Alphecca, 15, 34, 41, 26, 42, 52
+3.68, Corona Borealis, bet, Nusakan, 15, 27, 49, 29, 6, 20
+3.84, Corona Borealis, gam, Gamma Coronae Borealis, 15, 42, 44, 26, 17, 44
+4.63, Corona Borealis, del, Delta Coronae Borealis, 15, 49, 35, 26, 4, 5
+4.15, Corona Borealis, eps, Epsilon Coronae Borealis, 15, 57, 35, 26, 52, 40
+4.99, Corona Borealis, iot, Iota Coronae Borealis, 16, 1, 26, 29, 51, 3
+4.14, Corona Borealis, the, Theta Coronae Borealis, 15, 32, 55, 31, 21, 33
+3.48, Hercules, alp, Rasalgethi, 17, 14, 38, 14, 23, 25
+2.77, Hercules, bet, Kornephoros, 16, 30, 13, 21, 29, 22
+3.75, Hercules, gam, Gamma Herculis, 16, 21, 55, 19, 9, 11
+3.14, Hercules, del, Sarin, 17, 15, 1, 24, 50, 21
+3.92, Hercules, eps, Epsilon Herculis, 17, 0, 17, 30, 55, 55
+2.81, Hercules, zet, Zeta Herculis, 16, 41, 17, 31, 36, 11
+3.53, Hercules, eta, Eta Herculis, 16, 42, 53, 38, 55, 19
+3.86, Hercules, the, Theta Herculis, 17, 56, 15, 37, 15, 2
+3.8, Hercules, iot, Iota Herculis, 17, 39, 27, 46, 0, 23
+4.41, Hercules, lam, Maasym, 17, 30, 44, 26, 6, 38
+3.42, Hercules, mu, Mu Herculis, 17, 46, 27, 27, 43, 14
+3.16, Hercules, pi, Pi Herculis, 17, 15, 2, 36, 48, 33
+3.83, Hercules, omi, Omicron Herculis, 18, 7, 32, 28, 45, 44
+4.52, Hercules, rho, Rho Herculis, 17, 23, 40, 37, 8, 44
+4.2, Hercules, sig, Sigma Herculis, 16, 34, 6, 42, 26, 12
+3.89, Hercules, tau, Tau Herculis, 16, 19, 44, 46, 18, 47
+4.26, Hercules, phi, Phi Herculis, 16, 8, 46, 44, 56, 6
+3.7, Hercules, xi, Xi Herculis, 17, 57, 45, 29, 14, 52
+0.03, Lyra, alp, Vega, 18, 36, 56, 38, 47, 0
+3.45, Lyra, bet, Sheliak, 18, 50, 4, 33, 21, 46
+3.24, Lyra, gam, Gamma Lyrae, 18, 58, 56, 32, 41, 21
+4.3, Lyra, del, Delta Lyrae 2, 18, 54, 30, 36, 53, 56
+5.14, Lyra, eps, Epsilon Lyrae 2, 18, 44, 22, 39, 36, 47
+4.36, Lyra, zet, Zeta Lyrae 1, 18, 44, 46, 37, 36, 17
+1.25, Cygnus, alp, Deneb, 20, 41, 25, 45, 16, 49
+3.08, Cygnus, bet, Albireo, 19, 30, 43, 27, 57, 34
+2.2, Cygnus, gam, Sadr, 20, 22, 13, 40, 15, 24
+2.87, Cygnus, del, Fawaris, 19, 44, 58, 45, 7, 50
+2.46, Cygnus, eps, Aljanah, 20, 46, 12, 33, 58, 13
+3.2, Cygnus, zet, Zeta Cygni, 21, 12, 56, 30, 13, 36
+3.79, Cygnus, iot, Iota Cygni 2, 19, 29, 42, 51, 43, 46
+3.77, Lacerta, alp, Alpha Lacertae, 22, 31, 17, 50, 16, 56
+4.43, Lacerta, bet, Beta Lacertae, 22, 23, 33, 52, 13, 45
+4.13, Lacerta, 1, 1 Lacertae, 22, 15, 58, 37, 44, 56
+4.57, Lacerta, 2, 2 Lacertae, 22, 21, 1, 46, 32, 12
+4.57, Lacerta, 4, 4 Lacertae, 22, 24, 30, 49, 28, 35
+4.36, Lacerta, 5, 5 Lacertae, 22, 29, 31, 47, 42, 24
+4.51, Lacerta, 6, 6 Lacertae, 22, 30, 29, 43, 07, 23
+4.46, Lacerta, 11, 11 Lacertae, 22, 40, 30, 44, 16, 35
+
+2.0, Cet, bet, Diphda, 0, 43, 35, -17, 59, 12
+1.7, Cet, omi, Mira, 2, 19, 20, -2, 58, 39
