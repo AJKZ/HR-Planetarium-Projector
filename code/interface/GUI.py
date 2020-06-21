@@ -7,7 +7,7 @@ import numpy as n
 import pandas as p
 from pyopengltk import OpenGLFrame
 from OpenGL import GL, GLU
-import sys, math
+
 
 
 # Helper functions used to convert coordinates
@@ -53,8 +53,8 @@ class MainWindow(tk.Frame):
     def createObject(self):
 
         # organize the window
-        windowLayout1= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=6)
-        windowLayout1.place(x=380,y=540)
+        windowLayout= tk.Label(self.master,borderwidth=1,relief='solid',width=110,height=6)
+        windowLayout.place(x=380,y=540)
         
         # CalendarWindow object
         openCalendar = CalendarWindow()
@@ -76,11 +76,6 @@ class MainWindow(tk.Frame):
         label = tk.Label(self.master,text="Speed")
         label.place(x=390,y=543)
         
-        # treeview object
-        tree = Treeview(self.master)
-        tree._createTreeview()
-        tree._createSimulateButton()
-
         f = tk.Frame(self.master) # create a frame 
         f.place(x=380,y=15)
         global oGLWindow
@@ -88,18 +83,20 @@ class MainWindow(tk.Frame):
         oGLWindow.animate=1 #without this, simulation doesnt work
         oGLWindow.pack() # pack it
 
+        # treeview object
+        tree = Treeview(self.master)
+        tree._createTreeview()
+        tree.getChecked()
         
     def getOpenGLWindow(self): # return the openGLWindow object
         return oGLWindow
 
 
 class TextBox():
-
     def __init__(self,master):
         self.master = master
         
-    def createTextBoxAndScrollbar(self):
-       
+    def createTextBoxAndScrollbar(self):    
         #create a textbox
         self.tb = tk.Text(self.master, height=40, width=35)
         self.tb.place(x=1170,y=10)
@@ -110,42 +107,91 @@ class TextBox():
         scrollbar.config(command=self.tb.yview)    
         self.tb.config(yscrollcommand=scrollbar.set) # attach the scrollbar to the textbox
         
-        
-
-
 class OpenGLWindow(OpenGLFrame):
     # list to save the data
     xList = []
     yList = []
+    colorList = []
+    dotSizeList = []
 
-    minX=-1000000
-    maxX= 1000000
-    minY=-1000000
-    maxY= 1000000
+    # opengl perspective range
+    infinit = 10000000000
+    minX=-infinit
+    maxX= infinit
+    minY=-infinit
+    maxY= infinit
+
     zoomedOut=True
 
     def initgl(self):
         GL.glViewport(0, 0, self.width, self.height)    
         GL.glClearColor(0.0, 0.0, 0.0, 0.0) # clear the background color
         
-        GL.glPointSize(10.0)            # point size
+        #enable it
         GL.glEnable(GL.GL_PROGRAM_POINT_SIZE);
-        GL.glEnable(GL.GL_POINT_SMOOTH); # make the points round
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        GL.glEnable(GL.GL_POINT_SMOOTH);
         GL.glEnable( GL.GL_BLEND )
-        GL.glMatrixMode(GL.GL_PROJECTION)
-        GL.glLoadIdentity()
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); 
+        GL.glMatrixMode(GL.GL_PROJECTION) # specify which matrix is the current matrix
+        GL.glLoadIdentity() # reset matrix
         GLU.gluOrtho2D(self.minX, self.maxX, self.minY,self.maxY) # perspective
+        # bind the mouse movements
+        self.bind("<Button-1>",self.mousePress)
+        self.bind('<ButtonRelease-1>', self.mouseRelease)
+        self.bind('<Double-Button-1>',self.doublePress)
         self.start = time.time()
         self.nframes = 0
 
-    def addToList(self,x,y,z): # add the values to the lists
+    def doublePress(self,event): # press 2 times to zoom in and out
+        self.zoom()
+
+    def mousePress(self,event):
+        self.mousePressX = event.x
+        self.mousePressY = event.y
+        
+    def mouseRelease(self,event):
+        self.mouseReleaseX = event.x
+        self.mouseReleaseY = event.y
+        self.dragMovement()
+
+    def dragMovement(self):
+        deltaX = self.mouseReleaseX-self.mousePressX
+        deltaY = self.mouseReleaseY-self.mousePressY
+        # pos deltaX = from left to right
+        # neg deltaX = from right to left
+        # pos deltaY = down to up
+        # neg deltaY = up to down
+
+        if(deltaX > 0 and deltaX > deltaY):
+            self.moveRight()
+        elif(deltaY > 0):
+            self.moveDown()
+        if(deltaX < 0 and deltaX < deltaY):
+            self.moveLeft()
+        elif(deltaY < 0):
+            self.moveUp()
+
+    def addToList(self,x,y,z,color,magnitude): # add the values to the lists
         self.xList.append(x)
         self.yList.append(y)
-        
+        self.colorList.append(color)
+
+        # point size varies from magnitude
+        if(magnitude >= 0 and magnitude <0.5):
+            pointsize = 3
+        elif(magnitude >= 0.5 and magnitude <1):
+            pointsize = 5
+        elif(magnitude >=1 and magnitude < 1.5):
+            pointsize = 7
+        elif(magnitude >=1.5 and magnitude <2):
+            pointsize =9
+        elif(magnitude >=2):
+            pointsize = 13
+        self.dotSizeList.append(pointsize) # add it to the list
+
+
     def zoom(self):
-   
-        if(self.zoomedOut): 
+        if(self.zoomedOut): # if it is already zoomed out
             self.zoomIn()
             self.zoomedOut = False
         else:
@@ -159,8 +205,7 @@ class OpenGLWindow(OpenGLFrame):
         self.maxX*= 1.5  
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
-        GL.glPointSize(10.0) #change the point size
-
+        
     def zoomIn(self):
         self.minY/= 1.5
         self.maxY/= 1.5
@@ -168,51 +213,55 @@ class OpenGLWindow(OpenGLFrame):
         self.maxX/= 1.5  
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
-        GL.glPointSize(20.0) #change the point size
-         
+        
     def moveUp(self):
-        self.maxY+= 500000
-        self.minY+= 500000
+        self.maxY+= self.infinit/4
+        self.minY+= self.infinit/4
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
         
     def moveDown(self):
-        self.minY-= 500000
-        self.maxY-= 500000
+        self.minY-= self.infinit/4
+        self.maxY-= self.infinit/4
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
 
     def moveLeft(self):
-        self.minX-= 500000
-        self.maxX-= 500000
+        self.minX-= self.infinit/4
+        self.maxX-= self.infinit/4
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
 
     def moveRight(self):
-        self.maxX+= 500000
-        self.minX+= 500000
+        self.maxX+= self.infinit/4
+        self.minX+= self.infinit/4
         GL.glLoadIdentity()
         GLU.gluOrtho2D(self.minX,self.maxX,self.minY,self.maxY) #change perspective
 
     def redraw(self):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-        GL.glBegin(GL.GL_POINTS)
-        
         for i in range(len(self.xList)): # get the length of the list
+            size = self.dotSizeList[i]
+            if(self.zoomedOut):
+                GL.glPointSize(size) #change the point size
+            else:
+                size*=1.5 # increase the point size
+                GL.glPointSize(size) 
+            GL.glBegin(GL.GL_POINTS)
+            GL.glColor4f(self.colorList[i][0],self.colorList[i][1],self.colorList[i][2],self.colorList[i][3]) # get the colors
             GL.glVertex2f(self.xList[i] ,self.yList[i]  )   #get the x and y coordinates
-            
-        GL.glEnd()
+            GL.glEnd()
+
         GL.glFlush()
         self.nframes += 1
         tm = time.time() - self.start
         
 
-
 class Treeview():
     def __init__(self,master):
         self.master=master
         self.mw=MainWindow(self.master)
-
+        
         # create textBox to insert the data from the stars
         self.textBox = TextBox(self.master)
         self.textBox.createTextBoxAndScrollbar()     
@@ -224,6 +273,23 @@ class Treeview():
         self.textBox.tb.insert(tk.END, f"y coordinate : {XYZ[1]}\n")
         self.textBox.tb.insert(tk.END, f"z coordinate : {XYZ[2]}\n")
 
+    def setStarData(self,row):
+        h = Handler() 
+        self.name = h._getRow(5,row)
+        self.RA = float(time2deg(h._getRow(0, row)))  
+        self.dec = (h._getRow(1, row))
+        self.XYZ = sph2cart(self.RA, self.dec, 10000000000)  
+        self.magnitude = h._getRow(2, row)
+
+    def getXYZ(self):
+        return self.XYZ
+
+    def getName(self):
+        return self.name
+
+    def getMagnitude(self):
+        return self.magnitude
+
     def getChecked(self):
             checkedList = self.tree.get_checked()   # get all the checked values from the children checkboxes
             openGLWindow = self.mw.getOpenGLWindow() # get the openGLWindow object
@@ -231,93 +297,109 @@ class Treeview():
             # clear the list
             openGLWindow.xList.clear() 
             openGLWindow.yList.clear() 
+            openGLWindow.colorList.clear()
+            openGLWindow.dotSizeList.clear()
 
             #clear the text box
             self.textBox.tb.delete('1.0', tk.END)
 
-            h = Handler() 
+            whiteColor = [1,1,1,1]
+            grayColor = [1,1,1,0.2]
+            
             if checkedList.count("Sirrah") > 0: 
-                
-                name = h._getRow(5,0)
-                RA = float(time2deg(h._getRow(0, 0)))  
-                XYZ = sph2cart(29, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2]) # add the xyz data to the lists
-                self.setValuesToTextBox(name,XYZ)
-
+                self.setStarData(0) # give the row number to read the data from the data set
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) # add the xyz and color data to the lists
+                self.setValuesToTextBox(self.getName(),self.getXYZ()) #add the values to the textBox
+              
+            else: 
+                self.setStarData(0)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude()) 
+              
             if checkedList.count("Mirach") > 0: 
-                
-                name = h._getRow(5,6)
-                RA = float(time2deg(h._getRow(0, 6))) 
-                XYZ = sph2cart(35, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
-
+                self.setStarData(6)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(6)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+            
             if checkedList.count("Alamak") > 0: 
-                
-                name = h._getRow(5,11)
-                RA = float(time2deg(h._getRow(0,11))) 
-                XYZ = sph2cart(42, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2]) 
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(11)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+           
+            else: 
+                self.setStarData(11)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+            
 
             if checkedList.count("Hamal") > 0: 
-                
-                name = h._getRow(5,12)
-                RA = float(time2deg(h._getRow(0,12))) 
-                XYZ = sph2cart(23, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(12)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(12)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+            
 
             if checkedList.count("Colure_star") > 0: 
-                
-                name = h._getRow(5,1)
-                RA = float(time2deg(h._getRow(0,1))) 
-                XYZ = sph2cart(59, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(1)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(1)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+          
 
             if checkedList.count("Schedir") > 0: 
-                
-                name = h._getRow(5,3)
-                RA = float(time2deg(h._getRow(0,3))) 
-                XYZ = sph2cart(56, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(3)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(3)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+         
 
             if(checkedList.count("Deneb_Kaitos") > 0):
-                name = h._getRow(5,4)
-                RA = float(time2deg(h._getRow(0,4))) 
-                XYZ = sph2cart(-19, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
-
+                self.setStarData(4)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(4)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+           
             if(checkedList.count("Mira") > 0):
-                name = h._getRow(5,13)
-                RA = float(time2deg(h._getRow(0,13))) 
-                XYZ = sph2cart(-3, RA, 1000000)
-   
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(13)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(13)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+           
             
             if(checkedList.count("Polaris") > 0):
-                name = h._getRow(5,7)
-                RA = float(time2deg(h._getRow(0,7))) 
-                XYZ = sph2cart(-89, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(7)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(7)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+            
 
             if(checkedList.count("Kochab") > 0):
-                name = h._getRow(5,65)
-                RA = float(time2deg(h._getRow(0,65))) 
-                XYZ = sph2cart(75, RA, 1000000)
-                openGLWindow.addToList(XYZ[0],XYZ[1],XYZ[2])
-                self.setValuesToTextBox(name,XYZ)
+                self.setStarData(65)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],whiteColor,self.getMagnitude()) 
+                self.setValuesToTextBox(self.getName(),self.getXYZ())
+            else: 
+                self.setStarData(65)
+                openGLWindow.addToList(self.getXYZ()[0],self.getXYZ()[1],self.getXYZ()[2],grayColor,self.getMagnitude())
+              
 
     def _createTreeview(self):
         # create a checkbox treeview
         self.tree=CheckboxTreeview(self.master)
         self.tree.place(x=40,y=320,height=400);
-        
+        self.tree.bind("<ButtonRelease-1>", self.callBack) # bind an event to the checkbox.
         '''
         parameters: 
         - parent: identifier of the parent item
@@ -342,9 +424,11 @@ class Treeview():
         self.tree.insert("UMi","end","Kochab",text="Kochab")
         
 
-    def _createSimulateButton(self):     
-        simulateButton= tk.Button(self.master,text="Simulate", width=7,relief = "groove",command= self.getChecked)
-        simulateButton.place(x=640,y=560)
+
+    def callBack(self, event):
+        item = self.tree.identify('item',event.x,event.y)
+        self.getChecked()
+        
 
   
 
@@ -628,7 +712,7 @@ class Button():
         openGLWindow.zoom()
 
     def _moveToTop(self):
-        openGlWindow = self.mw.getOpenGLWindow() # get the openGLFrame object
+        openGlWindow = self.mw.getOpenGLWindow() 
         openGlWindow.moveUp()
 
     def _moveToBottom(self):
@@ -658,4 +742,11 @@ window.iconphoto(False, icon) # change the icon from the gui
 application = MainWindow(window)
 application.createObject()
 window.mainloop()
+
+
+
+
+
+
+
 
