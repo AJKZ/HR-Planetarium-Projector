@@ -2,22 +2,29 @@ import tkinter as tk
 from tkcalendar import Calendar
 from tkinter import ttk
 import datetime,time
+import serial
+
+port='COM4'
+ser=serial.Serial(port,9600)
 
 
 class MainWindow(tk.Frame):
 
     def __init__(self, master): 
+        
         self.master = master
 
         # Button widgets
         #self.quitButton= Button(self.master)
         self.confirmButton= Button(self.master)
+        self.playButton= Button(self.master)
+        self.pauseButton= Button(self.master)
 
         # Calendar widget
         self.calendarButton = Button(self.master)
 
         # spinBox widget
-        self.spinBox= tk.Spinbox(self.master ,from_=1, to=4)    #spinBox value only from 1 to 4
+        self.spinBox= tk.Spinbox(self.master,from_=1, to=4,state="readonly")    #spinBox value only from 1 to 4
         self.spinBox.place(x=300,y=500)
         self.spinBox= Button(self.master,self.spinBox)
 
@@ -47,12 +54,22 @@ class Checkbox():
             
     def checkValue(self): # check the checkBox value
         if(self.checkValue1.get()==True):
+            
             print("1 is true")
+            ser.write(str.encode('1'))
+            print(ser.read())
+            
         if(self.checkValue2.get()==True):
             print("2 is true")
+            ser.write(str.encode('2'))
+            
         if(self.checkValue3.get()==True):
             print("3 is true")
-           
+
+
+
+
+
 class Button():
     def __init__(self, master,controller=None): # we use controller to get the value from the spinBox widget from the MainWindow class
             self.spinBox=controller 
@@ -61,13 +78,27 @@ class Button():
             self.confirmButton=tk.Button(master, text = 'Confirm', width = 8,command=self.getSpinboxValue)#call the sendAcceleration function if button is pressed.
             self.confirmButton.place(x=340,y=520)
             self.calendarButton=tk.Button(master,text = "Calendar", width = 10,command=self.openCalendar)
-            self.calendarButton.place(x=600,y=600)
-    
+            self.calendarButton.place(x=600,y=500)
+             
+            self.playButton= tk.Button(master, text= " >", width=5,command= self.play)
+            self.playButton.place(x=600,y=600)
+            self.pauseButton=tk.Button(master, text= " ||", width=5,command= self.pause)
+            self.pauseButton.place(x=560,y=600)
+
+    def play(self):
+        print("playing")
+ 
+    def pause(self):
+        print("pause")
+
     def getSpinboxValue(self):
         value=self.spinBox.get() # get the spinBox value
         print(value)
+        ser.write(str.encode(value))
+
 
     def confirmCalendarButton(self):
+            
             date = self.calendar.selection_get().strftime("%d-%m-%Y") #change datetime to string
             print (date)
             if(date=="01-01-2020"):
@@ -75,7 +106,7 @@ class Button():
             
             
     def openCalendar(self):       
-        top = tk.Toplevel()
+        top = tk.Toplevel() #toplevel is to open a dialog
 
         # min and max date
         mindate = datetime.date(year=2000, month=1, day=21)
@@ -85,14 +116,15 @@ class Button():
         self.calendar = Calendar(top, font="Arial 14", selectmode='day', locale='en_US',
                     mindate=mindate, maxdate=maxdate, 
                     cursor="hand2", year=2020, month=1, day=1)
-        self.calendar.pack(fill="both", expand=True)
-
+        self.calendar.pack(fill="both", expand=True)       
+        
         button=tk.Button(top,text="ok", command=self.confirmCalendarButton).pack()
         
         
         
 def main(): 
     # settings for the MainWindow
+    time.sleep(1) #give the connection a second to settle
     window = tk.Tk()
     window.geometry("1400x750")
     window.title("GUI")
