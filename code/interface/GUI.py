@@ -4,31 +4,32 @@ from tkinter import ttk
 import datetime,time
 import serial
 
+
 port='COM4'
-ser=serial.Serial(port,9600)
+#ser=serial.Serial(port,9600)
 
 
-class MainWindow(tk.Frame):
+class MainWindow():
 
     def __init__(self, master): 
         
         self.master = master
 
-        # Button widgets
-        #self.quitButton= Button(self.master)
+        # to the Button class
         self.confirmButton= Button(self.master)
         self.playButton= Button(self.master)
         self.pauseButton= Button(self.master)
+        self.rewindButton= Button(self.master)
 
-        # Calendar widget
-        self.calendarButton = Button(self.master)
+        # to the CalendarWindow class
+        self.openCalendarButton = CalendarWindow(self.master)
 
         # spinBox widget
         self.spinBox= tk.Spinbox(self.master,from_=1, to=4,state="readonly")    #spinBox value only from 1 to 4
         self.spinBox.place(x=300,y=500)
         self.spinBox= Button(self.master,self.spinBox)
 
-        # checkbox widget
+        # to the Checkbox class
         self.checkBox1 = Checkbox(self.master)
         self.checkBox2 = Checkbox(self.master)
         self.checkBox3 = Checkbox(self.master)
@@ -37,65 +38,13 @@ class MainWindow(tk.Frame):
         self.label = tk.Label(self.master,text="Speed")
         self.label.place(x=300,y=480)
        
-class Checkbox():
+
+class CalendarWindow():
     def __init__(self,master):
-            # checkBox hold a Boolean
-            self.checkValue1 = tk.BooleanVar()
-            self.checkValue2 = tk.BooleanVar()
-            self.checkValue3 = tk.BooleanVar()
-            # initialise the checkboxes
-            self.checkBox1 = tk.Checkbutton(master,text = "HighLight 1",var=self.checkValue1,command= self.checkValue)
-            self.checkBox2 = tk.Checkbutton(master,text = "HighLight 2",var=self.checkValue2,command= self.checkValue)
-            self.checkBox3 = tk.Checkbutton(master,text = "HighLight 3",var=self.checkValue3,command= self.checkValue)
-            # place the checkboxes on the MainWindow
-            self.checkBox1.place(x=100,y=100)
-            self.checkBox2.place(x=100,y=120)
-            self.checkBox3.place(x=100,y=140)
-            
-    def checkValue(self): # check the checkBox value
-        if(self.checkValue1.get()==True):
-            
-            print("1 is true")
-            ser.write(str.encode('1'))
-            print(ser.read())
-            
-        if(self.checkValue2.get()==True):
-            print("2 is true")
-            ser.write(str.encode('2'))
-            
-        if(self.checkValue3.get()==True):
-            print("3 is true")
-
-
-
-
-
-class Button():
-    def __init__(self, master,controller=None): # we use controller to get the value from the spinBox widget from the MainWindow class
-            self.spinBox=controller 
-            #self.quitButton=tk.Button(master, text = 'X', width = 4 ,bg="red", command= quit) # quit the program if button is pressed
-            #self.quitButton.place(x=1500,y=0)
-            self.confirmButton=tk.Button(master, text = 'Confirm', width = 8,command=self.getSpinboxValue)#call the sendAcceleration function if button is pressed.
-            self.confirmButton.place(x=340,y=520)
-            self.calendarButton=tk.Button(master,text = "Calendar", width = 10,command=self.openCalendar)
-            self.calendarButton.place(x=600,y=500)
-             
-            self.playButton= tk.Button(master, text= " >", width=5,command= self.play)
-            self.playButton.place(x=600,y=600)
-            self.pauseButton=tk.Button(master, text= " ||", width=5,command= self.pause)
-            self.pauseButton.place(x=560,y=600)
-
-    def play(self):
-        print("playing")
- 
-    def pause(self):
-        print("pause")
-
-    def getSpinboxValue(self):
-        value=self.spinBox.get() # get the spinBox value
-        print(value)
-        ser.write(str.encode(value))
-
+        
+        # create a button to open the calendar
+        self.openCalendarButton=tk.Button(master,text = "Calendar", width = 10,command=self.openCalendar)
+        self.openCalendarButton.place(x=560,y=500)
 
     def confirmCalendarButton(self):
             
@@ -118,7 +67,70 @@ class Button():
                     cursor="hand2", year=2020, month=1, day=1)
         self.calendar.pack(fill="both", expand=True)       
         
-        button=tk.Button(top,text="ok", command=self.confirmCalendarButton).pack()
+        calendarbutton=tk.Button(top,text="confirm", command=self.confirmCalendarButton).pack()
+
+class Checkbox():
+    def __init__(self,master):
+            # checkBox hold a Boolean
+            self.checkValue1 = tk.BooleanVar()
+            self.checkValue2 = tk.BooleanVar()
+            self.checkValue3 = tk.BooleanVar()
+            # initialise the checkboxes
+            self.checkBox1 = tk.Checkbutton(master,text = "HighLight 1",var=self.checkValue1,command= self.checkValue)
+            self.checkBox2 = tk.Checkbutton(master,text = "HighLight 2",var=self.checkValue2,command= self.checkValue)
+            self.checkBox3 = tk.Checkbutton(master,text = "HighLight 3",var=self.checkValue3,command= self.checkValue)
+            # place the checkboxes on the MainWindow
+            self.checkBox1.place(x=100,y=100)
+            self.checkBox2.place(x=100,y=120)
+            self.checkBox3.place(x=100,y=140)
+            
+    def checkValue(self): # check the checkBox value
+        if(self.checkValue1.get()==True):
+            
+            print("1 is true")
+            #ser.write(str.encode('1'))
+            #print(ser.read())
+            
+        if(self.checkValue2.get()==True):
+            print("2 is true")
+            #ser.write(str.encode('2'))
+            
+        if(self.checkValue3.get()==True):
+            print("3 is true")
+
+
+class Button():
+    def __init__(self, master,controller=None): # we use controller to get the value from the spinBox widget from the MainWindow class
+            self.spinBox=controller 
+        
+  
+            # create Buttons and place it on the window
+            self.confirmButton=tk.Button(master, text = 'Confirm', width = 8,command=self.getSpinboxValue)#call the sendAcceleration function if button is pressed.
+            self.confirmButton.place(x=340,y=520)
+            self.playButton= tk.Button(master,text=">", width=5,command= self.play)
+            self.playButton.place(x=610,y=600)
+            self.pauseButton=tk.Button(master, text= " ||", width=5,command= self.pause)
+            self.pauseButton.place(x=560,y=600)
+            self.rewindButton=tk.Button(master, text= "<<", width= 5, command = self.rewind)
+            self.rewindButton.place(x=510,y=600)
+            self.fastforwardButton=tk.Button(master,text=">>",width=5,command=self.fastforward)
+            self.fastforwardButton.place(x=660,y=600)
+
+    def fastforward(self):
+        print("fast forward")        
+    def rewind(self):
+        print("rewind")
+
+    def play(self):
+        print("playing")
+ 
+    def pause(self):
+        print("pause")
+
+    def getSpinboxValue(self):
+        value=self.spinBox.get() # get the spinBox value
+        print(value)
+        #ser.write(str.encode(value))
         
         
         
@@ -126,7 +138,7 @@ def main():
     # settings for the MainWindow
     time.sleep(1) #give the connection a second to settle
     window = tk.Tk()
-    window.geometry("1400x750")
+    window.geometry("1200x750")
     window.title("GUI")
     window.configure(background="blue") 
     window.resizable(False,False) #disable resizable
